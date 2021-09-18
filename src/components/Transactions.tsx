@@ -1,10 +1,11 @@
 import { Component } from 'react'
-
-type TransactionsProps = { transactions: any[] }
+import { TransactionsProps } from '../types'
 
 export class Transactions extends Component<TransactionsProps> {
   render() {
-    console.log({ data: this.props.transactions })
+    if (!this.props.transactions) {
+      return <div>Loading...</div>
+    }
     return (
       <div style={{ display: 'grid', gap: '20px' }}>
         {this.props.transactions.map((transaction: any, index: number) => (
