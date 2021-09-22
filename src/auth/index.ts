@@ -5,18 +5,18 @@ export const encode64 = (input: string) => {
   return Buffer.from(input).toString('base64')
 }
 
-// const LIVE_URL = 'https://transact-example.herokuapp.com'
+const LIVE_URL = 'https://transact-example.herokuapp.com'
 
-const DEV_URL = 'http://localhost:5000'
+// const DEV_URL = 'http://localhost:5000'
 
 const getAuthUrl = (username: string, password: string) => {
   const encryptedPassword = encode64(password)
 
-  return `${DEV_URL}/auth?username=${username}&password=${encryptedPassword}`
+  return `${LIVE_URL}/auth?username=${username}&password=${encryptedPassword}`
 }
 
 const getSessionUrl = (token: string) => {
-  return `${DEV_URL}/auth?token=${token}`
+  return `${LIVE_URL}/auth?token=${token}`
 }
 
 export const authenticate = async (
@@ -24,6 +24,7 @@ export const authenticate = async (
   password: string,
 ): Promise<boolean> => {
   const url = getAuthUrl(username, password)
+
   return fetch(url).then(async (response) => {
     if (response.status === 200) {
       const token = await response.text()

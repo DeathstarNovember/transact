@@ -20,6 +20,7 @@ class App extends React.Component<{}, AppState> {
     super(props)
     this.state = initialState
     this.loadData = this.loadData.bind(this)
+    this.signOut = this.signOut.bind(this)
   }
 
   signOut() {
