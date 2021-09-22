@@ -2,6 +2,8 @@ export type AppState = {
   data?: Data[]
   loggedIn: boolean
   authError: boolean
+  userName?: string
+  dataError?: string
 }
 
 export type LoginProps = { onSignIn: () => void | Promise<void> }
