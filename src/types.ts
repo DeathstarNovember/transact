@@ -22,7 +22,7 @@ export type Data = {
   Amount: number
   ConfirmationNumber: string
   Id: string
-  Status: 'COMPRIMISED' | 'FRAUD' | 'VERIFIED'
+  Status: 'COMPROMISED' | 'FRAUD' | 'VERIFIED'
   Memo: string
   Recipient: string
   TransactionType: string
