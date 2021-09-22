@@ -6,8 +6,6 @@ import { Layout, Transactions } from './components'
 import { sampleData } from './data'
 import { AppState, Data } from './types'
 
-// API URL
-// `https://transact-example.herokuapp.com`
 
 const initialState = {
   data: undefined,
@@ -18,7 +16,7 @@ const initialState = {
 
 const API_URL = "https://transact-example.herokuapp.com";
 
-class App extends React.Component<{}, AppState> {
+export default class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
     super(props);
     this.state = initialState;
@@ -26,36 +24,40 @@ class App extends React.Component<{}, AppState> {
     this.signOut = this.signOut.bind(this);
   }
 
-  signOut() {
+  signOut() { //--- Handler function
     this.setState(initialState);
   }
 
-  loadData() {
+  loadData() {//--- Handler function
     const getConfiguredURL = (userName: string) => {
       return `${API_URL}?username=${userName}`; //--- Adds query to URL
     };
-    
-    const configuredURL =this.state.userName? getConfiguredURL(this.state.userName): undefined //--- if userName exist than add to URL
+
+    const configuredURL = this.state.userName
+      ? getConfiguredURL(this.state.userName)
+      : undefined; //--- if userName exist than add to URL
 
     const getData = async () => {
       if (configuredURL) {
-        const apiResponse = await fetch(configuredURL).then(async (response) => { //--- Call api with configured URL
-          if (response.status == 500) {
-            const errorText = await response.text()
-  
-            this.setState({
-              ...this.state,
-              dataError:
-                errorText || 'ERROR: retrieving your transactions',
-            })
-          } else if (response.status == 200) {
-            const data: Data[] = await response.json().catch((error) =>{
-              throw new Error('Response JSON was invalid. Error:' + error)
-            })
-            return data
+        const apiResponse = await fetch(configuredURL).then(
+          async (response) => {
+            //--- Call api with configured URL
+            if (response.status == 500) {
+              const errorText = await response.text();
+
+              this.setState({
+                ...this.state,
+                dataError: errorText || "ERROR: retrieving your transactions",
+              });
+            } else if (response.status == 200) {
+              const data: Data[] = await response.json().catch((error) => {
+                throw new Error("Response JSON was invalid. Error:" + error);
+              });
+              return data;
+            }
           }
-        })
-        return apiResponse
+        );
+        return apiResponse;
       }
     };
   }
