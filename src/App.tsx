@@ -14,7 +14,9 @@ const initialState = {
   userName: undefined,
 }
 
-const API_URL = "https://transact-example.herokuapp.com";
+const getConfiguredURL = (userName: string) => {
+  return `https://transact-example.herokuapp.com?username=${userName}`; //--- Adds query to URL
+};
 
 export default class App extends React.Component<{}, AppState> {
   constructor(props: {}) {
@@ -28,39 +30,43 @@ export default class App extends React.Component<{}, AppState> {
     this.setState(initialState);
   }
 
-  loadData() {//--- Handler function
-    const getConfiguredURL = (userName: string) => {
-      return `${API_URL}?username=${userName}`; //--- Adds query to URL
-    };
+  async loadData() {//--- Handler function
 
     const configuredURL = this.state.userName
       ? getConfiguredURL(this.state.userName)
       : undefined; //--- if userName exist than add to URL
 
-    const getData = async () => {
+    const getData = async() => {
       if (configuredURL) {
-        const apiResponse = await fetch(configuredURL).then(
-          async (response) => {
+        const apiResponse = await fetch(configuredURL).then(async (response) => {
             //--- Call api with configured URL
-            if (response.status == 500) {
-              const errorText = await response.text();
+          if (response.status == 500) {
+            const errorText = await response.text();
 
-              this.setState({
-                ...this.state,
-                dataError: errorText || "ERROR: retrieving your transactions",
-              });
-            } else if (response.status == 200) {
-              const data: Data[] = await response.json().catch((error) => {
-                throw new Error("Response JSON was invalid. Error:" + error);
-              });
-              return data;
-            }
+            this.setState({
+              ...this.state,
+              dataError: errorText || "ERROR: retrieving your transactions",
+            });
+          } else if (response.status == 200) {
+            const data: Data[] = await response.json().catch((error) => {
+              throw new Error("Response JSON was invalid. Error:" + error);
+            });
+            return data;
           }
-        );
+        })
         return apiResponse;
       }
     };
+
+    const data = await getData()
+
+    this.setState({
+    ...this.state,
+    loggedIn: true,
+    data,
+    });
   }
+
 
   async componentWillMount() {
     if (!this.state.authError) {
