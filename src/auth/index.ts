@@ -7,7 +7,7 @@ export const encode64 = (input: string) => {
 
 const LIVE_URL = 'https://transact-example.herokuapp.com'
 
-// const DEV_URL = 'http://localhost:5000'
+// const LIVE_URL = 'http://localhost:5000'
 
 const getAuthUrl = (username: string, password: string) => {
   const encryptedPassword = encode64(password)

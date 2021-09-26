@@ -1,10 +1,9 @@
+import { AppState, Data } from './types'
 import { Layout, Transactions } from './components'
 
-import { AppState } from './types'
 import Login from './auth/Login'
 import React from 'react'
 import { localAuth } from './auth'
-import { sampleData } from './data'
 
 // API URL
 // `https://transact-example.herokuapp.com`
@@ -27,11 +26,40 @@ class App extends React.Component<{}, AppState> {
     this.setState(initialState)
   }
 
-  loadData() {
+  async loadData() {
+    // 2. Add network (fetch) call here
+    const data: Data[] = await fetch(
+      `https://transact-example.herokuapp.com?username=${'user_bad'}`,
+    )
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json().then((jsonData: Data[]) => {
+            return jsonData
+          })
+        } else if (response.status === 500) {
+          console.log('status 500')
+          return [] as Data[]
+        } else {
+          return [] as Data[]
+        }
+      })
+      .catch((e) => {
+        console.log(e)
+        return [] as Data[]
+      })
+
+    const filteredData = data.filter((data) => {
+      return data.Status === 'COMPROMISED' || data.Status === 'FRAUD'
+    })
+
+    const sortedData = filteredData.sort((a, b) => {
+      return a.Date >= b.Date ? -1 : 1
+    })
+
     this.setState({
       ...this.state,
       loggedIn: true,
-      data: sampleData,
+      data: sortedData,
     })
   }
 
