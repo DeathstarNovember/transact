@@ -1,5 +1,6 @@
+import { getLocalStorage, setLocalStorage } from '../data'
+
 import { LocalStorageType } from '../types'
-import { setLocalStorage } from '../data'
 
 export const encode64 = (input: string) => {
   return Buffer.from(input).toString('base64')
@@ -29,7 +30,7 @@ export const authenticate = async (
     if (response.status === 200) {
       const token = await response.text()
 
-      setLocalStorage({ currentUser: { token } })
+      setLocalStorage({ currentUser: { username, token } })
 
       return true
     } else {
@@ -39,24 +40,28 @@ export const authenticate = async (
 }
 
 export const localAuth = async (callback?: () => void): Promise<boolean> => {
-  const storage = window.localStorage.getItem('transact_local')
+  const storage = getLocalStorage()
 
   const session: LocalStorageType = storage
-    ? JSON.parse(storage)
+    ? storage
     : { currentUser: undefined }
 
-  if (!session.currentUser) {
+  const token = session?.currentUser?.token
+
+  const username = session?.currentUser?.username
+
+  if (!(token && username)) {
     setLocalStorage(session)
 
     return false
   } else {
-    const sessionUrl = getSessionUrl(session.currentUser.token)
+    const sessionUrl = getSessionUrl(token)
 
     return await fetch(sessionUrl).then(async (response) => {
       const token = await response.text()
 
       if (token) {
-        setLocalStorage({ currentUser: { token } })
+        setLocalStorage({ currentUser: { token, username } })
 
         if (callback) {
           callback()
