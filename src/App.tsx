@@ -3,6 +3,7 @@ import { Layout, Transactions } from './components'
 
 import Login from './auth/Login'
 import React from 'react'
+import { getCurrentUser } from './data'
 import { localAuth } from './auth'
 
 // API URL
@@ -27,40 +28,45 @@ class App extends React.Component<{}, AppState> {
   }
 
   async loadData() {
-    // 2. Add network (fetch) call here
-    const data: Data[] = await fetch(
-      `https://transact-example.herokuapp.com?username=${'user_bad'}`,
-    )
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json().then((jsonData: Data[]) => {
-            return jsonData
-          })
-        } else if (response.status === 500) {
-          console.log('status 500')
+    const currentUser = getCurrentUser()
+
+    if (!currentUser?.username) {
+      this.setState(initialState)
+    } else {
+      const data: Data[] = await fetch(
+        `https://transact-example.herokuapp.com?username=${currentUser?.username}`,
+      )
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json().then((jsonData: Data[]) => {
+              return jsonData
+            })
+          } else if (response.status === 500) {
+            console.log('status 500')
+            return [] as Data[]
+          } else {
+            return [] as Data[]
+          }
+        })
+        .catch((e) => {
+          console.log(e)
           return [] as Data[]
-        } else {
-          return [] as Data[]
-        }
-      })
-      .catch((e) => {
-        console.log(e)
-        return [] as Data[]
+        })
+
+      const filteredData = data.filter((data) => {
+        return data.Status === 'COMPROMISED' || data.Status === 'FRAUD'
       })
 
-    const filteredData = data.filter((data) => {
-      return data.Status === 'COMPROMISED' || data.Status === 'FRAUD'
-    })
+      const sortedData = filteredData.sort((a, b) => {
+        return a.Date >= b.Date ? -1 : 1
+      })
 
-    const sortedData = filteredData.sort((a, b) => {
-      return a.Date >= b.Date ? -1 : 1
-    })
-
-    this.setState({
-      ...this.state,
-      loggedIn: true,
-      data: sortedData,
-    })
+      this.setState({
+        ...this.state,
+        loggedIn: true,
+        data: sortedData,
+      })
+    }
   }
 
   async componentWillMount() {
