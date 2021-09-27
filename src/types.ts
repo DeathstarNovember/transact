@@ -14,7 +14,7 @@ export type LoginState = {
   loginError?: string
 }
 
-export type TransactionsProps = { transactions?: Data[] }
+export type TransactionsProps = { transactions?: Data[]; dismissItem:(id:string) => void };
 
 export type LocalStorageType = {
   currentUser?: { token: string; username: string }

@@ -3,14 +3,14 @@ import { Layout, Transactions } from './components'
 import React, { useEffect, useState } from 'react'
 
 import Login from './auth/Login'
-import { getCurrentUser } from './data'
+import { getCurrentUser, setLocalStorage } from './data'
 import { localAuth } from './auth'
 
 // API URL
 // `https://transact-example.herokuapp.com`
 
 const initialState = {
-  data: undefined,
+  data: undefined, // <== the data array
   loggedIn: false,
   authError: false,
 }
@@ -20,6 +20,14 @@ const App: React.FC<{}> = () => {
 
   const signOut = () => {
     setState(initialState)
+    setLocalStorage()
+  }
+
+  const dismissItem = (id: string) => {
+//-- 1. produce new state
+    const newState = {...state, data: state?.data?.filter((item) => item.Id !== id)}
+
+    setState(newState)
   }
 
   const loadData = async () => {
@@ -74,16 +82,16 @@ const App: React.FC<{}> = () => {
         }
       }
     })()
-  }, [state.authError])
+  }, [])
 
   if (state.loggedIn) {
     return (
       <Layout>
         <button onClick={signOut}>Log Out</button>
         <h1>Recent Transactions</h1>
-        <Transactions transactions={state.data} />
+        <Transactions dismissItem={dismissItem} transactions={state.data} />
       </Layout>
-    )
+    );
   } else {
     return (
       <Layout>
