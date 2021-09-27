@@ -1,4 +1,6 @@
-export const sampleData = [
+import { Data } from '../types'
+
+export const sampleData: Data[] = [
   {
     Amount: 812,
     ConfirmationNumber: 'e7d6087c-bfb3-480a-91b1-9c78e4002638',

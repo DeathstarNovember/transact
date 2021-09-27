@@ -1,9 +1,6 @@
 import React, { Component } from 'react'
 import { authenticate } from '.'
-
-type LoginProps = { onSignIn: (username: string) => void }
-
-type LoginState = { username: string; password: string; loginError?: string }
+import { LoginProps, LoginState } from '../types'
 
 const initialLoginState = {
   username: 'user_bad',
@@ -32,7 +29,7 @@ export default class Login extends Component<LoginProps, LoginState> {
     this.setState({ ...initialLoginState, loginError: error })
   }
 
-  handleSubmit = (e: React.SyntheticEvent) => {
+  handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
     const target = e.target as typeof e.target & {
@@ -44,8 +41,8 @@ export default class Login extends Component<LoginProps, LoginState> {
 
     const password = target.password.value
 
-    if (authenticate(username, password)) {
-      this.props.onSignIn(username)
+    if (await authenticate(username, password)) {
+      await this.props.onSignIn()
     } else {
       this.setLoginError('Invalid username or password.')
     }

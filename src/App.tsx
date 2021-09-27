@@ -1,19 +1,18 @@
-import React from 'react'
-import Login from './auth/Login'
 import { Layout, Transactions } from './components'
-import { sampleData } from './data'
-// API URL
-// `https://transact-example.herokuapp.com?username=${username}`
 
-type AppState = {
-  loading: boolean
-  data: any
-  loggedIn: boolean
-}
-const initialState: AppState = {
-  loading: true,
+import { AppState } from './types'
+import Login from './auth/Login'
+import React from 'react'
+import { localAuth } from './auth'
+import { sampleData } from './data'
+
+// API URL
+// `https://transact-example.herokuapp.com`
+
+const initialState = {
   data: undefined,
   loggedIn: false,
+  authError: false,
 }
 
 class App extends React.Component<{}, AppState> {
@@ -21,13 +20,14 @@ class App extends React.Component<{}, AppState> {
     super(props)
     this.state = initialState
     this.loadData = this.loadData.bind(this)
+    this.signOut = this.signOut.bind(this)
   }
 
   signOut() {
     this.setState(initialState)
   }
 
-  loadData(username: string) {
+  loadData() {
     this.setState({
       ...this.state,
       loggedIn: true,
@@ -35,11 +35,21 @@ class App extends React.Component<{}, AppState> {
     })
   }
 
+  async componentWillMount() {
+    if (!this.state.authError) {
+      if (await localAuth(this.loadData)) {
+        this.setState({ ...this.state, loggedIn: true })
+      } else {
+        this.setState({ ...this.state, authError: true })
+      }
+    }
+  }
+
   render() {
-    console.log({ data: this.state.data })
-    if (this.state.loggedIn && this.state.data) {
+    if (this.state.loggedIn) {
       return (
         <Layout>
+          <button onClick={this.signOut}>Log Out</button>
           <h1>Recent Transactions</h1>
           <Transactions transactions={this.state.data} />
         </Layout>
