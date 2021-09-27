@@ -1,10 +1,10 @@
+import { AppState, Data } from './types'
 import { Layout, Transactions } from './components'
 import React, { useEffect, useState } from 'react'
 
-import { AppState } from './types'
 import Login from './auth/Login'
+import { getCurrentUser } from './data'
 import { localAuth } from './auth'
-import { sampleData } from './data'
 
 // API URL
 // `https://transact-example.herokuapp.com`
@@ -22,12 +22,46 @@ const App: React.FC<{}> = () => {
     setState(initialState)
   }
 
-  const loadData = () => {
-    setState({
-      ...state,
-      loggedIn: true,
-      data: sampleData,
-    })
+  const loadData = async () => {
+    const currentUser = getCurrentUser()
+
+    if (currentUser) {
+      const data: Data[] = await fetch(
+        `https://transact-example.herokuapp.com?username=${currentUser.username}`,
+      )
+        .then((response) => {
+          if (response.status === 200) {
+            return response.json().then((jsonData: Data[]) => {
+              return jsonData
+            })
+          } else if (response.status === 500) {
+            console.log('status 500')
+            return [] as Data[]
+          } else {
+            return [] as Data[]
+          }
+        })
+        .catch((e) => {
+          console.log(e)
+          return [] as Data[]
+        })
+
+      const filteredData = data.filter((data) => {
+        return data.Status === 'COMPROMISED' || data.Status === 'FRAUD'
+      })
+
+      const sortedData = filteredData.sort((a, b) => {
+        return a.Date >= b.Date ? -1 : 1
+      })
+
+      setState({
+        ...state,
+        loggedIn: true,
+        data: sortedData,
+      })
+    } else {
+      setState(initialState)
+    }
   }
 
   useEffect(() => {
@@ -36,7 +70,7 @@ const App: React.FC<{}> = () => {
         if (await localAuth(loadData)) {
           setState({ ...state, loggedIn: true })
         } else {
-          setState({ ...state, authError: true })
+          setState({ ...initialState, authError: true })
         }
       }
     })()

@@ -37,7 +37,7 @@ const Login: React.FC<LoginProps> = ({ onSignIn }) => {
     const password = target.password.value
 
     if (await authenticate(username, password)) {
-      await onSignIn()
+      await onSignIn(username)
     } else {
       setLoginError('Invalid username or password.')
     }

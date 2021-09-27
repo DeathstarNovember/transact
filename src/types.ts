@@ -4,7 +4,9 @@ export type AppState = {
   authError: boolean
 }
 
-export type LoginProps = { onSignIn: () => void | Promise<void> }
+export type LoginProps = {
+  onSignIn: (username: string) => void | Promise<void>
+}
 
 export type LoginState = {
   username: string
