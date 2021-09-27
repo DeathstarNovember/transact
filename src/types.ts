@@ -14,7 +14,9 @@ export type LoginState = {
 
 export type TransactionsProps = { transactions?: Data[] }
 
-export type LocalStorageType = { currentUser?: { token: string } }
+export type LocalStorageType = {
+  currentUser?: { token: string; username: string }
+}
 
 export type Data = {
   Amount: number
