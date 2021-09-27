@@ -1,35 +1,30 @@
-import React, { Component } from 'react'
-import { authenticate } from '.'
 import { LoginProps, LoginState } from '../types'
+import React, { useState } from 'react'
+
+import { authenticate } from '.'
 
 const initialLoginState = {
-  username: 'user_bad',
-  password: 'password_bad',
+  username: '',
+  password: '',
   loginError: undefined,
 }
 
-export default class Login extends Component<LoginProps, LoginState> {
-  constructor(props: LoginProps) {
-    super(props)
-    this.state = initialLoginState
-    this.changeUsername = this.changeUsername.bind(this)
-    this.changePassword = this.changePassword.bind(this)
-    this.setLoginError = this.setLoginError.bind(this)
+const Login: React.FC<LoginProps> = ({ onSignIn }) => {
+  const [state, setState] = useState<LoginState>(initialLoginState)
+
+  const changeUsername = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setState({ ...state, username: event.currentTarget.value })
   }
 
-  changeUsername(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ ...this.state, username: event.currentTarget.value })
+  const changePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setState({ ...state, password: event.currentTarget.value })
   }
 
-  changePassword = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ ...this.state, password: event.currentTarget.value })
+  const setLoginError = (error: string) => {
+    setState({ ...initialLoginState, loginError: error })
   }
 
-  setLoginError = (error: string) => {
-    this.setState({ ...initialLoginState, loginError: error })
-  }
-
-  handleSubmit = async (e: React.SyntheticEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
 
     const target = e.target as typeof e.target & {
@@ -42,40 +37,38 @@ export default class Login extends Component<LoginProps, LoginState> {
     const password = target.password.value
 
     if (await authenticate(username, password)) {
-      await this.props.onSignIn()
+      await onSignIn()
     } else {
-      this.setLoginError('Invalid username or password.')
+      setLoginError('Invalid username or password.')
     }
   }
 
-  render() {
-    return (
-      <form onSubmit={this.handleSubmit} style={formStyles}>
-        <input
-          value={this.state.username}
-          name="username"
-          placeholder="Username"
-          onChange={this.changeUsername}
-          style={inputStyles}
-        />
-        <input
-          value={this.state.password}
-          name="password"
-          placeholder="Password"
-          onChange={this.changePassword}
-          style={inputStyles}
-        />
-        {this.state.loginError ? (
-          <div style={{ fontFamily: 'sans-serif', color: 'pink' }}>
-            {this.state.loginError}
-          </div>
-        ) : (
-          <div style={{ height: '1em' }}></div>
-        )}
-        <input type="submit" />
-      </form>
-    )
-  }
+  return (
+    <form onSubmit={handleSubmit} style={formStyles}>
+      <input
+        value={state.username}
+        name="username"
+        placeholder="Username"
+        onChange={changeUsername}
+        style={inputStyles}
+      />
+      <input
+        value={state.password}
+        name="password"
+        placeholder="Password"
+        onChange={changePassword}
+        style={inputStyles}
+      />
+      {state.loginError ? (
+        <div style={{ fontFamily: 'sans-serif', color: 'pink' }}>
+          {state.loginError}
+        </div>
+      ) : (
+        <div style={{ height: '1em' }}></div>
+      )}
+      <input type="submit" />
+    </form>
+  )
 }
 
 const formStyles = {
@@ -89,3 +82,5 @@ const formStyles = {
 }
 
 const inputStyles = { height: '1.5rem', padding: '0.25rem' }
+
+export default Login

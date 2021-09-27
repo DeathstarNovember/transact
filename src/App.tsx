@@ -1,8 +1,8 @@
 import { Layout, Transactions } from './components'
+import React, { useEffect, useState } from 'react'
 
 import { AppState } from './types'
 import Login from './auth/Login'
-import React from 'react'
 import { localAuth } from './auth'
 import { sampleData } from './data'
 
@@ -15,53 +15,48 @@ const initialState = {
   authError: false,
 }
 
-class App extends React.Component<{}, AppState> {
-  constructor(props: {}) {
-    super(props)
-    this.state = initialState
-    this.loadData = this.loadData.bind(this)
-    this.signOut = this.signOut.bind(this)
+const App: React.FC<{}> = () => {
+  const [state, setState] = useState<AppState>(initialState)
+
+  const signOut = () => {
+    setState(initialState)
   }
 
-  signOut() {
-    this.setState(initialState)
-  }
-
-  loadData() {
-    this.setState({
-      ...this.state,
+  const loadData = () => {
+    setState({
+      ...state,
       loggedIn: true,
       data: sampleData,
     })
   }
 
-  async componentWillMount() {
-    if (!this.state.authError) {
-      if (await localAuth(this.loadData)) {
-        this.setState({ ...this.state, loggedIn: true })
-      } else {
-        this.setState({ ...this.state, authError: true })
+  useEffect(() => {
+    ;(async () => {
+      if (!state.authError) {
+        if (await localAuth(loadData)) {
+          setState({ ...state, loggedIn: true })
+        } else {
+          setState({ ...state, authError: true })
+        }
       }
-    }
-  }
+    })()
+  }, [state.authError])
 
-  render() {
-    if (this.state.loggedIn) {
-      return (
-        <Layout>
-          <button onClick={this.signOut}>Log Out</button>
-          <h1>Recent Transactions</h1>
-          <Transactions transactions={this.state.data} />
-        </Layout>
-      )
-    } else {
-      return (
-        <Layout>
-          <h1>Check Recent Transactions</h1>
-          <Login onSignIn={this.loadData} />
-        </Layout>
-      )
-    }
+  if (state.loggedIn) {
+    return (
+      <Layout>
+        <button onClick={signOut}>Log Out</button>
+        <h1>Recent Transactions</h1>
+        <Transactions transactions={state.data} />
+      </Layout>
+    )
+  } else {
+    return (
+      <Layout>
+        <h1>Check Recent Transactions</h1>
+        <Login onSignIn={loadData} />
+      </Layout>
+    )
   }
 }
 
